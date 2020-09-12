@@ -301,27 +301,27 @@ function download_modem_firmware() {
     SWI9X30C_LENGTH=$(curl -sI "$SWI9X30C_URL" | grep -i Content-Length | grep -Eo '[0-9]+')
 
     # If remote file size is less than 40MiB, something went wrong, exit.
-    if [[ $SWI9X30C_LENGTH -lt 40000000 ]]; then
+    if [[ $SWI9X30C_02_LENGTH -lt 40000000 ]]; then
         printf "${CYAN}---${NC}\n"
-        printf "Download of ${CYAN}$SWI9X30C_ZIP${NC} failed.\nFile size on server is too small, something is wrong, exiting...\n"
-        printf "Attempted download URL was: $SWI9X30C_URL\n"
+        printf "Download of ${CYAN}$SWI9X30C_02_ZIP${NC} failed.\nFile size on server is too small, something is wrong, exiting...\n"
+        printf "Attempted download URL was: $SWI9X30C_02_URL\n"
         printf "curl info:\n"
-        curl -sI "$SWI9X30C_URL"
+        curl -sI "$SWI9X30C_02_URL"
         printf "${CYAN}---${NC}\n"
         exit
     fi
 
-    if [[ $SWI9X30C_LENGTH -eq $(stat --printf="%s" "$SWI9X30C_ZIP" 2>/dev/null) ]]; then
-        echo "Already downloaded $SWI9X30C_ZIP..."
+    if [[ $SWI9X30C_02_LENGTH -eq $(stat --printf="%s" "$SWI9X30C_02_ZIP" 2>/dev/null) ]]; then
+        echo "Already downloaded $SWI9X30C_02_ZIP..."
     else
-        echo "Downloading $SWI9X30C_URL"
-        curl -o "$SWI9X30C_ZIP" "$SWI9X30C_URL"
+        echo "Downloading $SWI9X30C_02_URL"
+        curl -o "$SWI9X30C_02_ZIP" "$SWI9X30C_02_URL"
     fi
 
     # If download size does not match what server says, exit:
-    if [[ $SWI9X30C_LENGTH -ne $(stat --printf="%s" "$SWI9X30C_ZIP" 2>/dev/null) ]]; then
+    if [[ $SWI9X30C_02_LENGTH -ne $(stat --printf="%s" "$SWI9X30C_02_ZIP" 2>/dev/null) ]]; then
         printf "${CYAN}---${NC}\n"
-        printf "Download of ${CYAN}$SWI9X30C_ZIP${NC} failed.\nDownloaded file size is inconsistent with server, exiting...\n"
+        printf "Download of ${CYAN}$SWI9X30C_02_ZIP${NC} failed.\nDownloaded file size is inconsistent with server, exiting...\n"
         printf "${CYAN}---${NC}\n"
         exit
     fi
@@ -330,7 +330,7 @@ function download_modem_firmware() {
     rm -f ./*.cwe ./*.nvu 2>/dev/null
     
     # Unzip SWI9X30C, force overwrite
-    unzip -o "$SWI9X30C_ZIP"
+    unzip -o "$SWI9X30C_02_ZIP"
 }
 
 function flash_modem_firmware() {
@@ -338,9 +338,9 @@ function flash_modem_firmware() {
     sudo pkill -9 cat &>/dev/null
 
     printf "${CYAN}---${NC}\n"
-    echo "Flashing $SWI9X30C_CWE onto Generic Sierra Modem..."
+    echo "Flashing $SWI9X30C_02_CWE onto Generic Sierra Modem..."
     sleep 5
-    qmi-firmware-update --update -d "$deviceid" "$SWI9X30C_CWE" "$SWI9X30C_NVU"
+    qmi-firmware-update --update -d "$deviceid" "$SWI9X30C_02_CWE" "$SWI9X30C_02_NVU"
     rc=$?
     if [[ $rc != 0 ]]
     then
@@ -504,7 +504,7 @@ fi
 SWI9X30C_CWE=$(find . -maxdepth 1 -type f -iregex '.*SWI9X30C[0-9_.]+\.cwe' | cut -c 3- | tail -n1)
 SWI9X30C_NVU=$(find . -maxdepth 1 -type f -iregex '.*SWI9X30C[0-9_.]+generic[0-9_.]+\.nvu' | cut -c 3- | tail -n1)
 
-AT_PRIID_STRING=$(strings "$SWI9X30C_NVU" | grep '^9999999_.*_SWI9X30C_' | sort -u | head -1)
+AT_PRIID_STRING=$(strings "$SWI9X30C_02_NVU" | grep '^9999999_.*_SWI9X30C_02_' | sort -u | head -1)
 AT_PRIID_PN="$(echo "$AT_PRIID_STRING" | awk -F'_' '{print $2}')"
 AT_PRIID_REV="$(echo "$AT_PRIID_STRING" | grep -Eo '[0-9]{3}\.[0-9]{3}')"
 
